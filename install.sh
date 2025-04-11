@@ -194,8 +194,8 @@ install_dependencies() {
         echo "{}" > "${APP_DIR}/config.json"
     fi
     if [ ! -f "${APP_DIR}/callsign_cache.json" ]; then
-        echo "Creating callsign_cache.json file..."
-        touch "${APP_DIR}/callsign_cache.json"
+        echo "Creating callsign_cache.json file with default empty JSON..."
+        echo "{}" > "${APP_DIR}/callsign_cache.json"
     fi
 
     echo "Changing ownership of files to user '${SVXLINK_USER}'..."
