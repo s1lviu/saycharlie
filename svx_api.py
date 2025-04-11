@@ -43,10 +43,10 @@ def send_dtmf_to_svxlink(dtmf_code, dtmf_ctrl_pty):
     try:
         with open(dtmf_ctrl_pty, "w") as f:
             f.write(dtmf_code)
-            logging.info(f"DTMF code '{dtmf_code}' sent to svxlink.")
+            logging.info(f"DTMF code '%s' sent to svxlink.", dtmf_code)
             return True, "Success"
     except IOError as e:
-        logging.error(f"Failed to send DTMF code due to IO error: {e}")
+        logging.error("Failed to send DTMF code due to IO error: %s", e)
         return False, str(e)
 
 
@@ -88,7 +88,7 @@ def get_log_file_path():
             return log_file_via_process, "Log file found using process command-line parsing."
 
     except subprocess.CalledProcessError as e:
-        logging.error("Failed to parse log file path from process arguments: {}".format(e))
+        logging.error("Failed to parse log file path from process arguments: %s", e)
 
     logging.error("Log file not found in service properties, default location, or process arguments.")
     return None, "Log file not found."
@@ -111,10 +111,10 @@ def find_config_file():
             if config_path.exists() and access(config_path, R_OK):
                 return str(config_path), "Configuration file found at predefined location."
         except PermissionError as e:
-            logging.error(f"Permission denied while accessing {config_path}: {e}")
+            logging.error("Permission denied while accessing %s: %s", config_path, e)
             continue
 
-    # If predefined locations check fails, use the shell command to parse process arguments
+    # If predefined locations check fails, use a shell command to parse process arguments
     try:
         shell_command = """
         ps aux | grep '[s]vxlink' | grep -- '--config' | awk '{
@@ -128,10 +128,11 @@ def find_config_file():
         if config_file_via_process:
             return config_file_via_process, "Configuration file found using process command-line parsing."
     except subprocess.CalledProcessError as e:
-        logging.error("Failed to parse configuration file path from process arguments: {}".format(e))
+        logging.error("Failed to parse configuration file path from process arguments: %s", e)
 
     logging.error(
-        "SvxLink configuration file not found in service properties, predefined locations, or process arguments.")
+        "SvxLink configuration file not found in service properties, predefined locations, or process arguments."
+    )
     return None, "SvxLink configuration file not found."
 
 
@@ -143,7 +144,7 @@ def get_dtmf_ctrl_pty_from_config(config_file):
             if config.has_option(section, "DTMF_CTRL_PTY"):
                 return config.get(section, "DTMF_CTRL_PTY"), "DTMF control PTY found."
     except configparser.Error as e:
-        logging.error(f"Failed to parse configuration file: {e}")
+        logging.error("Failed to parse configuration file: %s", e)
     return None, "DTMF_CTRL_PTY not found in the configuration file."
 
 
@@ -155,7 +156,7 @@ def get_ptt_ctrl_pty_from_config(config_file):
             if config.has_option(section, "PTY_PATH"):
                 return config.get(section, "PTY_PATH"), "PTT control PTY found."
     except configparser.Error as e:
-        logging.error(f"Failed to parse configuration file: {e}")
+        logging.error("Failed to parse configuration file: %s", e)
     return None, "PTY_PATH not found in the configuration file."
 
 
@@ -169,7 +170,7 @@ def get_callsign_from_config():
                 if config.has_option(section, "CALLSIGN"):
                     return config.get(section, "CALLSIGN")
         except configparser.Error as e:
-            logging.error(f"Failed to parse configuration file: {e}")
+            logging.error("Failed to parse configuration file: %s", e)
     return None
 
 
@@ -189,10 +190,10 @@ def send_ptt_to_svxlink(ptt_code, ptt_ctrl_pty):
     try:
         with open(ptt_ctrl_pty, "w") as f:
             f.write(ptt_code)
-            logging.info(f"PTT code '{ptt_code}' sent to svxlink.")
+            logging.info("PTT code '%s' sent to svxlink.", ptt_code)
             return True, "Success"
     except IOError as e:
-        logging.error(f"Failed to send PTT code due to IO error: {e}")
+        logging.error("Failed to send PTT code due to IO error: %s", e)
         return False, str(e)
 
 
@@ -219,7 +220,7 @@ def stop_svxlink_service():
         logging.info("SvxLink service stopped successfully.")
         return True, "SvxLink service stopped successfully."
     except subprocess.CalledProcessError as e:
-        logging.error(f"Failed to stop SvxLink service: {e}")
+        logging.error("Failed to stop SvxLink service: %s", e)
         return False, str(e)
 
 
@@ -229,7 +230,7 @@ def restart_svxlink_service():
         logging.info("SvxLink service restarted successfully.")
         return True, "SvxLink service restarted successfully."
     except subprocess.CalledProcessError as e:
-        logging.error(f"Failed to restart SvxLink service: {e}")
+        logging.error("Failed to restart SvxLink service: %s", e)
         return False, str(e)
 
 
@@ -267,7 +268,7 @@ def get_profile_hosts(profile_path):
                 hostname = socket.gethostbyaddr(first_host)[0]
                 return hostname
             except socket.herror:
-                logging.error(f"Failed to resolve hostname for IP address: {first_host}")
+                logging.error("Failed to resolve hostname for IP address: %s", first_host)
                 return first_host
         except ValueError:
             # Not an IP address, return as is
@@ -295,9 +296,7 @@ def get_svx_profiles():
     if svxlink_path.exists():
         for file in svxlink_path.iterdir():
             if file.is_file() and file.suffix == '.conf':
-                # profile_name is profile absolute path
-                profile_name = str(Path(file).absolute())
-                # Append a dictionary with profile name and active status
+                profile_name = str(file.absolute())
                 if profile_name != active_profile:
                     svx_profiles.append({
                         'name': profile_name,
@@ -326,6 +325,7 @@ def get_active_profile():
 def switch_svxlink_profile(profile_path):
     """
     Switch the original svxlink configuration file to a symlink pointing to the selected profile.
+    Uses sudo commands for file operations so that root ownership can remain on /etc/svxlink.
     """
     try:
         config_file, message = find_config_file()
@@ -336,49 +336,50 @@ def switch_svxlink_profile(profile_path):
         if not success:
             return False, message
 
-        profile_path = Path(profile_path)
-        symlink_path = Path(config_file)
+        # Remove any existing symlink or file via sudo
+        try:
+            subprocess.run(["sudo", "rm", "-f", config_file], check=True)
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to remove existing file/symlink: %s", e)
+            return False, str(e)
 
-        # Ensure the directory for the symlink exists
-        symlink_path.parent.mkdir(parents=True, exist_ok=True)
+        # Create a new symlink via sudo
+        try:
+            subprocess.run(["sudo", "ln", "-s", str(profile_path), str(config_file)], check=True)
+            logging.info("Switched to profile via symlink: %s", profile_path)
+        except subprocess.CalledProcessError as e:
+            logging.error("Failed to create symlink to profile: %s", e)
+            return False, str(e)
 
-        # Remove the existing symlink or file if it exists
-        if symlink_path.is_symlink() or symlink_path.exists():
-            symlink_path.unlink()
-
-        # Create a new symlink
-        symlink_path.symlink_to(profile_path)
-        logging.info(f"Switched to profile via symlink: {profile_path}")
-
-        # Restart the svxlink service to apply the new configuration
+        # Restart SvxLink
         restart_svxlink_service()
-
         return True, f"Switched to profile via symlink: {profile_path}"
+
     except FileNotFoundError as e:
-        logging.error(f"Profile configuration file not found: {e}")
+        logging.error("Profile configuration file not found: %s", e)
         return False, str(e)
     except OSError as e:
-        logging.error(f"Failed to switch to profile due to OS error: {e}")
+        logging.error("Failed to switch to profile due to OS error: %s", e)
         return False, str(e)
-    except Exception as e:  # Catch-all for other unexpected issues
-        logging.error(f"An unexpected error occurred: {e}")
+    except Exception as e:
+        logging.error("An unexpected error occurred: %s", e)
         return False, str(e)
 
 
 def backup_original_svxlink_config():
     """
-    Backup the original svxlink configuration file, if no backup exists.
+    Backup the original svxlink configuration file, if no backup exists, using sudo to move it.
     """
     config_file, message = find_config_file()
     if config_file:
         backup_file = Path(config_file).with_suffix('.bak')
         if not backup_file.exists():
             try:
-                Path(config_file).replace(backup_file)
-                logging.info(f"Original configuration file backed up to: {backup_file}")
+                subprocess.run(["sudo", "mv", str(config_file), str(backup_file)], check=True)
+                logging.info("Original configuration file backed up to: %s", backup_file)
                 return True, f"Original configuration file backed up to: {backup_file}"
-            except Exception as e:
-                logging.error(f"Failed to backup original configuration file: {e}")
+            except subprocess.CalledProcessError as e:
+                logging.error("Failed to backup original configuration file: %s", e)
                 return False, str(e)
         else:
             return True, f"Backup already exists: {backup_file}"
@@ -387,22 +388,21 @@ def backup_original_svxlink_config():
 
 def restore_original_svxlink_config():
     """
-    Restore the original svxlink configuration file from the backup
+    Restore the original svxlink configuration file from the backup, using sudo to move it back.
     """
     config_file, message = find_config_file()
     if config_file:
         backup_file = Path(config_file).with_suffix('.bak')
         if backup_file.exists():
             try:
-                Path(backup_file).replace(config_file)
-                logging.info(f"Original configuration file restored from backup.")
+                subprocess.run(["sudo", "mv", str(backup_file), str(config_file)], check=True)
+                logging.info("Original configuration file restored from backup.")
 
-                # Restart the svxlink service to apply the restored configuration
+                # Restart SvxLink
                 restart_svxlink_service()
-
                 return True, "Original configuration file restored from backup."
-            except Exception as e:
-                logging.error(f"Failed to restore original configuration file from backup: {e}")
+            except subprocess.CalledProcessError as e:
+                logging.error("Failed to restore original configuration file from backup: %s", e)
                 return False, str(e)
         else:
             return False, "Backup file does not exist."

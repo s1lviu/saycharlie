@@ -239,7 +239,7 @@ EOF
 setup_sudoers() {
     echo "Setting up sudoers for user '${SVXLINK_USER}'..."
     cat <<EOF > "${SUDOERS_FILE}"
-${SVXLINK_USER} ALL=(ALL) NOPASSWD: /bin/systemctl stop svxlink, /bin/systemctl start svxlink, /bin/systemctl restart svxlink, /sbin/shutdown, /sbin/reboot, /usr/bin/git *
+${SVXLINK_USER} ALL=(ALL) NOPASSWD: /bin/systemctl stop svxlink, /bin/systemctl start svxlink, /bin/systemctl restart svxlink, /sbin/shutdown, /sbin/reboot, /usr/bin/git *, /bin/ln *, /bin/rm *
 EOF
     chmod 0440 "${SUDOERS_FILE}"
     echo "Sudoers configuration applied at ${SUDOERS_FILE}."
