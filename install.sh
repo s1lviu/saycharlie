@@ -33,13 +33,15 @@ APP_DIR="${DEFAULT_APP_DIR}"
 ###############################################################################
 detect_svxlink_user() {
     local user
+    # Search for the svxlink process and extract the user running it
     user=$(ps -eo user,comm | awk '$2=="svxlink" { print $1; exit }')
+
+    # Default to user 'svxlink' if no active svxlink process is found
     if [ -z "$user" ]; then
-        echo "No active svxlink process found, defaulting to 'svxlink'."
         user="svxlink"
-    else
-        echo "Detected svxlink process user: $user"
     fi
+
+    # Return the detected or default user
     echo "$user"
 }
 
@@ -181,6 +183,17 @@ install_dependencies() {
     fi
     echo "Installing Python dependencies..."
     pip install -r "${APP_DIR}/requirements.txt"
+
+    echo "Creating necessary directories and files..."
+    if [ ! -d "${APP_DIR}/profile-uploads" ]; then
+        echo "Creating profile-uploads directory..."
+        mkdir -p "${APP_DIR}/profile-uploads"
+    fi
+    if [ ! -f "${APP_DIR}/config.json" ]; then
+        echo "Creating config.json file..."
+        touch "${APP_DIR}/config.json"
+    fi
+
 }
 
 ###############################################################################
