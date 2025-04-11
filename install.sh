@@ -190,8 +190,8 @@ install_dependencies() {
         mkdir -p "${APP_DIR}/profile-uploads"
     fi
     if [ ! -f "${APP_DIR}/config.json" ]; then
-        echo "Creating config.json file..."
-        touch "${APP_DIR}/config.json"
+        echo "Creating config.json file with default empty JSON..."
+        echo "{}" > "${APP_DIR}/config.json"
     fi
     if [ ! -f "${APP_DIR}/callsign_cache.json" ]; then
         echo "Creating callsign_cache.json file..."
