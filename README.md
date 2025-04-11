@@ -69,12 +69,12 @@ interactions and ensures efficient management of the SVXLink services.
 
 ### Prerequisites
 
-- SVXLink installed and configured on a linux system
+- SVXLink installed, configured and **running** as a service on a Linux system
 - Python 3.6 or higher
 
 ### Installation
 
-#### Clone the repository
+#### Clone the repository (e.g. to `/opt` directory)
 
 ```bash
 git clone https://github.com/BrainicHQ/saycharlie.git
@@ -86,13 +86,13 @@ git clone https://github.com/BrainicHQ/saycharlie.git
 cd saycharlie
 ```
 
-#### Make the install script executable
+#### Make the installation script executable
 
 ```bash
 sudo chmod +x install.sh
 ```
 
-#### Run the install script
+#### Run the installation script
 
 ```bash
 sudo ./install.sh
@@ -167,10 +167,10 @@ documentation.
 
 This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
 
-## Support
+## ~~Support~~
 
-For support, feature requests, or any other inquiries, please open an issue in the GitHub issue tracker for this
-repository.
+~~For support, feature requests, or any other inquiries, please open an issue in the GitHub issue tracker for this
+repository.~~
 
 ## Acknowledgements
 
