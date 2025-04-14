@@ -146,7 +146,7 @@ GitHub repository and install it. After the update is complete, the application 
 
 ## Usage
 
-After installation, access the dashboard via http://saycharlie:8337 or http://localhost:8337 to begin managing and
+After installation, access the dashboard via http://saycharlie.local:8337 or http://localhost:8337 to begin managing and
 interacting with your SVXLink service.
 
 ## Logging
