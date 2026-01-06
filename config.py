@@ -37,7 +37,10 @@ def load_settings():
                 with open(config_path, 'r') as file:
                     data = json.load(file)
                 print("Config loaded successfully.")
-                return data
+                # Merge loaded config with defaults to ensure all required keys exist
+                merged_data = initial_data.copy()
+                merged_data.update(data)
+                return merged_data
             except json.decoder.JSONDecodeError:
                 print("Error: Config file is invalid JSON. Using default settings.")
         else:
