@@ -23,7 +23,7 @@ pytz==2024.1
 requests==2.32.2
 simple-websocket==1.1.0
 six==1.17.0
-urllib3==2.3.0
+urllib3==2.6.0
 watchdog==4.0.1
 Werkzeug==3.0.6
 wsproto==1.2.0
