@@ -37,7 +37,7 @@ setup(
         'numpy==1.26.4',
         'python-dateutil==2.9.0.post0',
         'pytz==2024.1',
-        'requests==2.32.2',
+        'requests==2.32.4',
         'watchdog==4.0.1',
         'Werkzeug==3.1.4',
         'zeroconf==0.132.2'
