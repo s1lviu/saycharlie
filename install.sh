@@ -220,7 +220,7 @@ Description=saycharlie SVX Dashboard
 ## Requires=svxlink.service
 After=network.target
 Wants=svxlink.service
-After=svxlink.servicee
+After=svxlink.service
 
 [Service]
 User=${SVXLINK_USER}
